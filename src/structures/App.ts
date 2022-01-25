@@ -41,7 +41,6 @@ export class App {
       }]);
     } else {
       const differenceSeconds = Math.floor(difference / 1000);
-      console.log(differenceSeconds);
       const absoluteDifferenceSeconds = Math.abs(differenceSeconds);
 
       const differenceText = `${
