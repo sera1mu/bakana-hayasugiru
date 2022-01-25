@@ -108,6 +108,8 @@ export class App {
         if (
           !(payload.title.includes("#shorts") ||
             payload.title.includes("#Shorts") ||
+            payload.description.includes("#shorts") ||
+            payload.description.includes("#Shorts") ||
             await this.youtubeClient?.isLiveStreaming(payload.videoId))
         ) {
           await this.sendPostedMessage(payload);

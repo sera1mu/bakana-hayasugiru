@@ -47,6 +47,8 @@ export interface TextMessage {
 }
 
 export interface ZapierPayload {
+  description: string;
+
   playURL: string;
 
   publishedDate: string;
@@ -60,12 +62,14 @@ export const isZapierPayload = function isArgZapierPayload(
   // deno-lint-ignore no-explicit-any
   arg: any,
 ): arg is ZapierPayload {
-  const exceptedKeys = '["playURL","publishedDate","title","videoId"]';
+  const exceptedKeys =
+    '["description","playURL","publishedDate","title","videoId"]';
   const actualKeys = JSON.stringify(Object.keys(arg).sort());
 
   if (exceptedKeys !== actualKeys) return false;
 
-  return typeof arg.playURL === "string" &&
+  return typeof arg.description === "string" &&
+    typeof arg.playURL === "string" &&
     typeof arg.publishedDate === "string" &&
     typeof arg.title === "string" && typeof arg.videoId === "string";
 };
