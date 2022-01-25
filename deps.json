@@ -2,6 +2,7 @@
   "imports": {
     "ky": "https://cdn.skypack.dev/ky?dts",
     "opine": "https://deno.land/x/opine@2.1.1/mod.ts",
-    "cron": "https://deno.land/x/deno_cron@v1.0.0/cron.ts"
+    "cron": "https://deno.land/x/deno_cron@v1.0.0/cron.ts",
+    "std/http/server": "https://deno.land/std@0.120.0/http/server.ts"
   }
 }
