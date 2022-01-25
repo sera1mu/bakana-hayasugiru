@@ -1,4 +1,4 @@
-import { cron, stop } from "cron";
+import cron from "cron";
 import { json, opine } from "opine";
 import { Server } from "std/http/server";
 import { Config, isZapierPayload, ZapierPayload } from "../types.ts";
@@ -123,7 +123,9 @@ export class App {
     console.log("Shutdowning...");
 
     // Stop all schedules of cron
-    stop();
+    for (const task of cron.getTasks()) {
+      task.stop();
+    }
 
     // Close server
     this.webServer?.close();
@@ -135,14 +137,18 @@ export class App {
     const opineServer = this.getOpineServer();
     const [hours, minutes] = this.config.postTime.split(":");
 
-    cron(`0 ${minutes} ${hours} * * *`, () => {
+    cron.schedule(`0 ${minutes} ${hours} * * *`, () => {
       this.lineClient?.broadcastTextMessages([{
         type: "text",
         text: `定時 (${hours}:${minutes}) になりました。`,
       }]);
+    }, {
+      timezone: this.config.timezone,
     });
 
-    cron(`0 0 0 * * *`, () => this.postCounter = 0);
+    cron.schedule(`0 0 0 * * *`, () => this.postCounter = 0, {
+      timezone: this.config.timezone,
+    });
 
     this.webServer = opineServer.listen(this.config.port, () => {
       console.log(`Server is listening on ${this.config.port}`);
