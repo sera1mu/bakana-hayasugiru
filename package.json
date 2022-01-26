@@ -7,6 +7,14 @@
   "author": "Seraimu <seraimu.neko@outlook.jp>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'",
+    "fmt": "prettier --check .",
+    "fmt:fix": "prettier --write .",
+    "build": "yarn lint && yarn fmt && yarn build:tsc",
+    "build:tsc": "tsc"
+  },
   "devDependencies": {
     "@types/node": "16",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
