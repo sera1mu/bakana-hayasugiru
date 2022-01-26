@@ -10,9 +10,9 @@
   "scripts": {
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint --fix 'src/**/*.ts'",
-    "fmt": "prettier --check .",
-    "fmt:fix": "prettier --write .",
-    "build": "yarn lint && yarn fmt && yarn build:tsc",
+    "fmt": "prettier --write .",
+    "fmt:check": "prettier --check .",
+    "build": "yarn lint && yarn fmt:check && yarn build:tsc",
     "build:tsc": "tsc"
   },
   "devDependencies": {
