@@ -1,7 +1,6 @@
 module.exports = {
   singleQuote: true,
-  trailingComma: "es5",
+  trailingComma: "all",
   semi: true,
-  parser: "typescript",
   tabWidth: 2,
 }
