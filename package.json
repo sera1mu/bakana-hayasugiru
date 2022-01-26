@@ -1,0 +1,10 @@
+{
+  "name": "bakana-hayasugiru",
+  "version": "0.1.0",
+  "description": "Notify LINE of video posting",
+  "main": "index.js",
+  "repository": "git@github.com:sera1mu/bakana-hayasugiru.git",
+  "author": "Seraimu <seraimu.neko@outlook.jp>",
+  "license": "MIT",
+  "private": true
+}
