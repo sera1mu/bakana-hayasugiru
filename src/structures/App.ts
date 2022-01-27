@@ -1,12 +1,18 @@
 import cron from 'node-cron';
 import express from 'express';
 import bodyParser from 'body-parser';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import { Server } from 'http';
 import { Logger } from 'log4js';
 import loggers from './log4js';
 import { Config, isZapierPayload, ZapierPayload } from '../types';
 import LINEAPIClient from './LINEAPIClient';
 import YouTubeAPIClient from './YouTubeAPIClient';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default class App {
   private readonly config: Config;
@@ -27,37 +33,40 @@ export default class App {
     this.postCounter = 0;
   }
 
-  private static getDifferenceAdverb(
-    difference: number,
-    additionalText?: string,
+  private static generateDifferenceText(
+    excepted: dayjs.Dayjs,
+    actual: dayjs.Dayjs,
   ) {
-    let result = `${
-      typeof additionalText !== 'undefined' ? additionalText : ''
-    }`;
+    const diff = excepted.diff(actual, 'seconds');
+    const diffInUnits = {
+      hours: Math.floor(diff / 3600),
+      minutes: Math.floor((diff % 3600) / 60),
+      seconds: diff % 60,
+    };
+    const baseText = `${diffInUnits.hours}時間${diffInUnits.minutes}分${diffInUnits.seconds}秒`;
 
-    if (difference === 0) {
-      result += '丁度';
+    if (excepted.isSame(actual, 'seconds')) {
+      return `丁度`;
     }
 
-    if (difference < 0) {
-      result += '早く';
+    if (excepted.isAfter(actual, 'seconds')) {
+      return `${baseText}早く`;
     }
 
-    result += '遅く';
-
-    return result;
+    return `${baseText}遅く`;
   }
 
   private async sendPostedMessage(payload: ZapierPayload) {
     const [hours, minutes] = this.config.postTime.split(':');
-    const exceptedPostTime = new Date();
-    exceptedPostTime.setHours(parseInt(hours, 10));
-    exceptedPostTime.setMinutes(parseInt(minutes, 10));
-    exceptedPostTime.setSeconds(0);
+    const exceptedPostTime = dayjs()
+      .tz(this.config.timezone)
+      .set('hours', parseInt(hours, 10))
+      .set('minutes', parseInt(minutes, 10))
+      .set('seconds', 0);
 
-    const actualPostedDate = new Date(payload.publishedDate);
-
-    const difference = actualPostedDate.getTime() - exceptedPostTime.getTime();
+    const actualPostedDate = dayjs(payload.publishedDate).tz(
+      this.config.timezone,
+    );
 
     if (this.postCounter > 0) {
       await this.lineClient?.broadcastTextMessages([
@@ -69,24 +78,15 @@ export default class App {
         },
       ]);
     } else {
-      const differenceSeconds = Math.floor(difference / 1000);
-      const absoluteDifferenceSeconds = Math.abs(differenceSeconds);
-
-      const differenceText = `${Math.floor(
-        absoluteDifferenceSeconds / 3600,
-      )}時間${Math.floor(
-        (absoluteDifferenceSeconds % 1000) / 60,
-      )}分${Math.floor(absoluteDifferenceSeconds % 60)}秒で`;
-
       await this.lineClient?.broadcastTextMessages([
         {
           type: 'text',
           text: `新しい動画が投稿されました!\n${
             payload.title
-          }\n${App.getDifferenceAdverb(
-            difference,
-            differenceText,
-          )}投稿されました。 \n${payload.playURL}`,
+          }\n${App.generateDifferenceText(
+            exceptedPostTime,
+            actualPostedDate,
+          )}投稿されました。\n${payload.playURL}`,
         },
       ]);
     }
