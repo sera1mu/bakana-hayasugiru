@@ -1,5 +1,7 @@
 # bakana-hayasugiru
 
+[English](https://github.com/sera1mu/bakana-hayasugiru#readme) / **日本語**
+
 bakana-hayasugiru はYouTubeチャンネルの動画投稿と動画が通常の時間に投稿されているかチェックして通知するBotです。
 
 [〇〇の主役は我々だ!](https://www.youtube.com/c/NemesisLaAlgol1936) の通知のために開発されました。

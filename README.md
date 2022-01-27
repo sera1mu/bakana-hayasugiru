@@ -1,5 +1,7 @@
 # bakana-hayasugiru
 
+**English** / [日本語](https://github.com/sera1mu/bakana-hayasugiru/blob/main/README.ja.md)
+
 bakana-hayasugiru is a bot that notify YouTube channel video posting and checking posted at regular time.
 
 Developed for [〇〇の主役は我々だ!](https://www.youtube.com/c/NemesisLaAlgol1936) notifications.
