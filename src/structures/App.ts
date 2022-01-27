@@ -201,8 +201,10 @@ export default class App {
       },
     );
 
-    this.webServer = webServer.listen(this.config.port, () => {
-      console.log(`Server is listening on ${this.config.port}`);
+    const port = process.env.PORT || 3000;
+
+    this.webServer = webServer.listen(port, () => {
+      console.log(`Server is listening on ${port}`);
     });
   }
 }

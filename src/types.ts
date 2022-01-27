@@ -3,8 +3,6 @@ export interface Config {
 
   lineChannelAccessToken: string;
 
-  port: number;
-
   postTime: string;
 
   timezone: string;
@@ -15,7 +13,7 @@ export interface Config {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isConfig = function isArgConfig(arg: any): arg is Config {
   const exceptedKeys =
-    '["apiKey","lineChannelAccessToken","port","postTime","timezone","youTubeAPIKey"]';
+    '["apiKey","lineChannelAccessToken","postTime","timezone","youTubeAPIKey"]';
 
   const actualKeys = JSON.stringify(Object.keys(arg).sort());
 
@@ -26,7 +24,6 @@ export const isConfig = function isArgConfig(arg: any): arg is Config {
   return (
     typeof arg.apiKey === 'string' &&
     typeof arg.lineChannelAccessToken === 'string' &&
-    typeof arg.port === 'number' &&
     typeof arg.postTime === 'string' &&
     typeof arg.timezone === 'string' &&
     typeof arg.youTubeAPIKey === 'string'
