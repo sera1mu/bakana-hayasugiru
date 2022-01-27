@@ -2,12 +2,16 @@ import cron from 'node-cron';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { Server } from 'http';
+import { Logger } from 'log4js';
+import loggers from './log4js';
 import { Config, isZapierPayload, ZapierPayload } from '../types';
 import LINEAPIClient from './LINEAPIClient';
 import YouTubeAPIClient from './YouTubeAPIClient';
 
 export default class App {
   private readonly config: Config;
+
+  private readonly logger: Logger;
 
   private lineClient?: LINEAPIClient;
 
@@ -19,6 +23,7 @@ export default class App {
 
   constructor(config: Config) {
     this.config = config;
+    this.logger = loggers.application;
     this.postCounter = 0;
   }
 
@@ -91,6 +96,7 @@ export default class App {
 
   private getExpressServer(): express.Express {
     return express()
+      .use(loggers.express)
       .use(bodyParser.urlencoded({ extended: true }))
       .use(bodyParser.json())
       .get('/', (_req, res) => {
@@ -103,8 +109,7 @@ export default class App {
         const apiKey = req.header('X-Api-Key');
 
         if (typeof apiKey === 'undefined') {
-          res.status(401);
-          res.json({
+          res.status(401).json({
             ok: false,
             reason: 'The X-Api-Key header has not been specified.',
           });
@@ -113,8 +118,7 @@ export default class App {
         }
 
         if (apiKey !== this.config.apiKey) {
-          res.status(401);
-          res.json({
+          res.status(401).json({
             ok: false,
             reason: 'The API key is incorrect.',
           });
@@ -150,30 +154,45 @@ export default class App {
 
             res.json({ ok: true });
           })
-          .catch(() => {
+          .catch((err) => {
             res.status(500).json({
               ok: false,
             });
+
+            this.logger.error(
+              `Failed to check live streaming from YouTube API.`,
+              err,
+            );
           });
       });
   }
 
   shutdown() {
-    console.log('Shutdowning...');
+    this.logger.info('Shutdowning...');
 
     // Stop all schedules of cron
     cron.getTasks().forEach((task) => {
       task.stop();
     });
 
+    this.logger.info('Stopped all scheduled tasks.');
+
     // Close server
     this.webServer?.close();
+
+    this.logger.info('Closed web server.');
   }
 
   start() {
+    this.logger.info('Starting server...');
+
+    // Initialize clients
     this.lineClient = new LINEAPIClient(this.config.lineChannelAccessToken);
     this.youtubeClient = new YouTubeAPIClient(this.config.youTubeAPIKey);
+
     const webServer = this.getExpressServer();
+
+    // Register schedules
     const [hours, minutes] = this.config.postTime.split(':');
 
     cron.schedule(
@@ -201,10 +220,12 @@ export default class App {
       },
     );
 
+    this.logger.info('Registered schedule tasks.');
+
     const port = process.env.PORT || 3000;
 
     this.webServer = webServer.listen(port, () => {
-      console.log(`Server is listening on ${port}`);
+      this.logger.info(`Server is listening on ${port}!`);
 
       process.on('SIGINT', () => this.shutdown());
       process.on('SIGTERM', () => this.shutdown());

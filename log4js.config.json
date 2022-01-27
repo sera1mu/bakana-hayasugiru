@@ -1,0 +1,39 @@
+{
+  "appenders": {
+    "AccessLogAppender": {
+      "type": "dateFile",
+      "filename": "/Users/seraimu/projects/bakana-hayasugiru/logs/access.log",
+      "pattern": "-yyyy-MM-dd",
+      "backups": 3
+    },
+    "AppLogAppender": {
+      "type": "dateFile",
+      "filename": "/Users/seraimu/projects/bakana-hayasugiru/logs/app.log",
+      "pattern": "-yyyy-MM-dd",
+      "backups": 3
+    },
+    "DefaultLogAppender": {
+      "type": "dateFile",
+      "filename": "/Users/seraimu/projects/bakana-hayasugiru/logs/default.log",
+      "pattern": "-yyyy-MM-dd",
+      "backups": 3
+    },
+    "ConsoleAppender": {
+      "type": "console"
+    }
+  },
+  "categories": {
+    "access": {
+      "appenders": ["AccessLogAppender", "ConsoleAppender"],
+      "level": "all"
+    },
+    "application": {
+      "appenders": ["AppLogAppender", "ConsoleAppender"],
+      "level": "all"
+    },
+    "default": {
+      "appenders": ["DefaultLogAppender", "ConsoleAppender"],
+      "level": "all"
+    }
+  }
+}
