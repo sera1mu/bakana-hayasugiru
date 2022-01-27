@@ -205,6 +205,9 @@ export default class App {
 
     this.webServer = webServer.listen(port, () => {
       console.log(`Server is listening on ${port}`);
+
+      process.on('SIGINT', () => this.shutdown());
+      process.on('SIGTERM', () => this.shutdown());
     });
   }
 }
