@@ -23,8 +23,7 @@ const boot = function bootServer() {
   loggers.default.info(`bakana-hayasugiru ${VERSION} (c) 2022 Seraimu.`);
   loggers.default.info(`Loading files...`);
 
-  const configPath = process.argv[2];
-  const config = getConfig(configPath);
+  const config = getConfig('./config.json');
 
   const app = new App(config);
 
