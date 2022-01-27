@@ -7,7 +7,7 @@ import timezone from 'dayjs/plugin/timezone';
 import { Server } from 'http';
 import { Logger } from 'log4js';
 import loggers from './log4js';
-import { Config, isZapierPayload, ZapierPayload } from '../types';
+import { Config, isZapierPayload, VideoItem } from '../types';
 import LINEAPIClient from './LINEAPIClient';
 import YouTubeAPIClient from './YouTubeAPIClient';
 
@@ -56,7 +56,7 @@ export default class App {
     return `${baseText}遅く`;
   }
 
-  private async sendPostedMessage(payload: ZapierPayload) {
+  private async sendPostedMessage(item: VideoItem) {
     const [hours, minutes] = this.config.postTime.split(':');
     const exceptedPostTime = dayjs()
       .tz(this.config.timezone)
@@ -64,7 +64,7 @@ export default class App {
       .set('minutes', parseInt(minutes, 10))
       .set('seconds', 0);
 
-    const actualPostedDate = dayjs(payload.publishedDate).tz(
+    const actualPostedDate = dayjs(item.snippet?.publishedAt).tz(
       this.config.timezone,
     );
 
@@ -72,9 +72,13 @@ export default class App {
       await this.lineClient?.broadcastTextMessages([
         {
           type: 'text',
-          text: `新しい動画が投稿されました。\n${payload.title}\nこれは今日で ${
+          text: `新しい動画が投稿されました。\n${
+            item.snippet?.title
+          }\nこれは今日で ${
             this.postCounter + 1
-          }回目の投稿のため、時差計算はされません。\n${payload.playURL}`,
+          }回目の投稿のため、時差計算はされません。\nhttps://youtube.com/watch?v=${
+            item.id
+          }`,
         },
       ]);
     } else {
@@ -82,11 +86,11 @@ export default class App {
         {
           type: 'text',
           text: `新しい動画が投稿されました!\n${
-            payload.title
+            item.snippet?.title
           }\n${App.generateDifferenceText(
             exceptedPostTime,
             actualPostedDate,
-          )}投稿されました。\n${payload.playURL}`,
+          )}投稿されました。\nhttps://youtube.com/watch?v=${item.id}`,
         },
       ]);
     }
@@ -126,9 +130,9 @@ export default class App {
           return;
         }
 
-        const payload = req.body;
+        const { body } = req;
 
-        if (!isZapierPayload(payload)) {
+        if (!isZapierPayload(body)) {
           res.status(400).json({
             ok: false,
             reason: 'The request body is not in the correct format.',
@@ -138,18 +142,19 @@ export default class App {
         }
 
         this.youtubeClient
-          ?.isLiveStreaming(payload.videoId)
-          .then(async (isStream) => {
+          ?.getVideo(body.videoId)
+          .then(async (payload) => {
+            const item = payload.items[0];
             if (
               !(
-                payload.title.includes('#shorts') ||
-                payload.title.includes('#Shorts') ||
-                payload.description.includes('#shorts') ||
-                payload.description.includes('#Shorts') ||
-                isStream
+                item.snippet?.title.includes('#shorts') ||
+                item.snippet?.title.includes('#Shorts') ||
+                item.snippet?.description.includes('#shorts') ||
+                item.snippet?.description.includes('#Shorts') ||
+                typeof payload.items[0].liveStreamingDetails !== 'undefined'
               )
             ) {
-              await this.sendPostedMessage(payload);
+              await this.sendPostedMessage(payload.items[0]);
             }
 
             res.json({ ok: true });

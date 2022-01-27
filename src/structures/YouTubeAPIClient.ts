@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { isYouTubePayload } from '../types';
+import { isYouTubePayload, YouTubePayload } from '../types';
 
 /**
  * YouTube Data API client
@@ -23,13 +23,13 @@ export default class YouTubeAPIClient {
   }
 
   /**
-   * Whether the video is live streaming or its archive
+   * Get video data (snippet,liveStreamingDetails)
    */
-  async isLiveStreaming(videoId: string) {
+  async getVideo(videoId: string): Promise<YouTubePayload> {
     const details = await this.client
       .get('/videos', {
         params: {
-          part: 'liveStreamingDetails',
+          part: 'snippet,liveStreamingDetails',
           id: videoId,
           maxResults: '1',
         },
@@ -42,7 +42,16 @@ export default class YouTubeAPIClient {
       throw new TypeError('YouTube Payload is incorrect.');
     }
 
-    if (typeof details.data.items[0].liveStreamingDetails === 'undefined') {
+    return details.data;
+  }
+
+  /**
+   * Whether the video is live streaming or its archive
+   */
+  async isLiveStreaming(videoId: string) {
+    const payload = await this.getVideo(videoId);
+
+    if (typeof payload.items[0].liveStreamingDetails === 'undefined') {
       return false;
     }
 
