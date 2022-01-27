@@ -2,19 +2,19 @@
   "appenders": {
     "AccessLogAppender": {
       "type": "dateFile",
-      "filename": "/Users/seraimu/projects/bakana-hayasugiru/logs/access.log",
+      "filename": "./logs/access.log",
       "pattern": "-yyyy-MM-dd",
       "backups": 3
     },
     "AppLogAppender": {
       "type": "dateFile",
-      "filename": "/Users/seraimu/projects/bakana-hayasugiru/logs/app.log",
+      "filename": "./logs/app.log",
       "pattern": "-yyyy-MM-dd",
       "backups": 3
     },
     "DefaultLogAppender": {
       "type": "dateFile",
-      "filename": "/Users/seraimu/projects/bakana-hayasugiru/logs/default.log",
+      "filename": "./logs/default.log",
       "pattern": "-yyyy-MM-dd",
       "backups": 3
     },
