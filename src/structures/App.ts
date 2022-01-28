@@ -39,9 +39,9 @@ export default class App {
   ) {
     const diff = excepted.diff(actual, 'seconds');
     const diffInUnits = {
-      hours: Math.floor(diff / 3600),
-      minutes: Math.floor((diff % 3600) / 60),
-      seconds: diff % 60,
+      hours: Math.abs(Math.floor(diff / 3600)),
+      minutes: Math.abs(Math.floor((diff % 3600) / 60)),
+      seconds: Math.abs(diff % 60),
     };
     const baseText = `${diffInUnits.hours}時間${diffInUnits.minutes}分${diffInUnits.seconds}秒`;
 
